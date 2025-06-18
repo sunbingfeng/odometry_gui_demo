@@ -22,7 +22,7 @@ class OdometryGUIDemo:
         """Initialize the main GUI application"""
         self.root = tk.Tk()
         self.root.title("Odometry & Robotics Demo Suite")
-        self.root.geometry("1400x900")
+        self.root.geometry("1200x1000")
         
         # Configure style
         self.setup_style()
@@ -85,23 +85,32 @@ class OdometryGUIDemo:
         
         # Create description
         desc_text = """This demo shows 2D pose visualization with position (x, y) and orientation (θ).
-        Use the sliders to control the pose parameters and see real-time updates."""
+        Use the sliders to control the pose parameters and see real-time updates.
+        The pose is visualized in the 2D plot."""
         desc_label = ttk.Label(pose_frame, text=desc_text, wraplength=600, 
-                              font=('Arial', 10))
+                              font=('Arial', 10), justify=tk.CENTER)
         desc_label.pack(pady=5)
         
+        # Create paned window for resizable sections
+        paned_window = ttk.PanedWindow(pose_frame, orient=tk.VERTICAL)
+        paned_window.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Create plot frame (top section)
+        plot_frame = ttk.Frame(paned_window)
+        paned_window.add(plot_frame, weight=3)  # Plot gets more space
+        
         # Create matplotlib figure
-        self.pose_fig = Figure(figsize=(10, 6), dpi=100)
-        self.pose_canvas = FigureCanvasTkAgg(self.pose_fig, pose_frame)
-        self.pose_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.pose_fig = Figure(figsize=(8, 5), dpi=100)  # Reduced figure size
+        self.pose_canvas = FigureCanvasTkAgg(self.pose_fig, plot_frame)
+        self.pose_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Create toolbar
-        pose_toolbar = NavigationToolbar2Tk(self.pose_canvas, pose_frame)
+        pose_toolbar = NavigationToolbar2Tk(self.pose_canvas, plot_frame)
         pose_toolbar.update()
         
-        # Create controls frame
-        controls_frame = ttk.Frame(pose_frame)
-        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        # Create controls frame (bottom section)
+        controls_frame = ttk.Frame(paned_window)
+        paned_window.add(controls_frame, weight=1)  # Controls get less space but are always visible
         
         # Sliders
         self.create_pose_controls(controls_frame)
@@ -112,29 +121,33 @@ class OdometryGUIDemo:
         
     def create_pose_controls(self, parent):
         """Create controls for pose visualization"""
+        # Create a more compact layout with better organization
         # X position slider
-        ttk.Label(parent, text="X Position:").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(parent, text="X Position:").grid(row=0, column=0, padx=5, pady=3, sticky='w')
         self.x_slider = ttk.Scale(parent, from_=-5, to=5, orient=tk.HORIZONTAL, 
                                  command=self.update_pose)
         self.x_slider.set(0)
-        self.x_slider.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
+        self.x_slider.grid(row=0, column=1, padx=5, pady=3, sticky='ew')
         
         # Y position slider
-        ttk.Label(parent, text="Y Position:").grid(row=1, column=0, padx=5, pady=5)
+        ttk.Label(parent, text="Y Position:").grid(row=1, column=0, padx=5, pady=3, sticky='w')
         self.y_slider = ttk.Scale(parent, from_=-5, to=5, orient=tk.HORIZONTAL, 
                                  command=self.update_pose)
         self.y_slider.set(0)
-        self.y_slider.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
+        self.y_slider.grid(row=1, column=1, padx=5, pady=3, sticky='ew')
         
         # Orientation slider
-        ttk.Label(parent, text="Orientation (deg):").grid(row=2, column=0, padx=5, pady=5)
+        ttk.Label(parent, text="Orientation (deg):").grid(row=2, column=0, padx=5, pady=3, sticky='w')
         self.theta_slider = ttk.Scale(parent, from_=-180, to=180, orient=tk.HORIZONTAL, 
                                      command=self.update_pose)
         self.theta_slider.set(0)
-        self.theta_slider.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
+        self.theta_slider.grid(row=2, column=1, padx=5, pady=3, sticky='ew')
         
         # Configure grid weights
         parent.columnconfigure(1, weight=1)
+        parent.rowconfigure(0, weight=1)
+        parent.rowconfigure(1, weight=1)
+        parent.rowconfigure(2, weight=1)
         
     def create_rotation_tab(self):
         """Create the rotation demo tab"""
@@ -146,25 +159,38 @@ class OdometryGUIDemo:
                                font=('Arial', 16, 'bold'))
         title_label.pack(pady=10)
         
+        # Create description frame for centering
+        desc_frame = ttk.Frame(rotation_frame)
+        desc_frame.pack(fill=tk.X, pady=5)
+        
         # Create description
-        desc_text = """This demo shows 2D point rotation, 2D vector rotation, and 3D vector rotation.
-        Use the theta slider to control rotation angle and see real-time matrix transformations."""
-        desc_label = ttk.Label(rotation_frame, text=desc_text, wraplength=600, 
-                              font=('Arial', 10))
-        desc_label.pack(pady=5)
+        desc_text = """This demo shows 2D vector rotation, and 3D vector rotation.
+Use the theta slider to control rotation angle and see real-time matrix transformations.
+The 3D rotation is shown in the 3D plot."""
+        desc_label = ttk.Label(desc_frame, text=desc_text, wraplength=600, 
+                              font=('Arial', 10), justify=tk.CENTER)
+        desc_label.pack(expand=True)
+        
+        # Create paned window for resizable sections
+        paned_window = ttk.PanedWindow(rotation_frame, orient=tk.VERTICAL)
+        paned_window.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Create plot frame (top section)
+        plot_frame = ttk.Frame(paned_window)
+        paned_window.add(plot_frame, weight=3)  # Plot gets more space
         
         # Create matplotlib figure
-        self.rotation_fig = Figure(figsize=(12, 8), dpi=100)
-        self.rotation_canvas = FigureCanvasTkAgg(self.rotation_fig, rotation_frame)
-        self.rotation_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.rotation_fig = Figure(figsize=(10, 6), dpi=100)  # Reduced figure size
+        self.rotation_canvas = FigureCanvasTkAgg(self.rotation_fig, plot_frame)
+        self.rotation_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Create toolbar
-        rotation_toolbar = NavigationToolbar2Tk(self.rotation_canvas, rotation_frame)
+        rotation_toolbar = NavigationToolbar2Tk(self.rotation_canvas, plot_frame)
         rotation_toolbar.update()
         
-        # Create controls frame
-        controls_frame = ttk.Frame(rotation_frame)
-        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        # Create controls frame (bottom section)
+        controls_frame = ttk.Frame(paned_window)
+        paned_window.add(controls_frame, weight=1)  # Controls get less space but are always visible
         
         # Initialize rotation demo
         self.rotation_demo = RotationDemo(self.rotation_fig)
@@ -176,19 +202,24 @@ class OdometryGUIDemo:
     def create_rotation_controls(self, parent):
         """Create controls for rotation demo"""
         # Theta slider
-        ttk.Label(parent, text="Rotation Angle (deg):").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(parent, text="Rotation Angle (deg):").grid(row=0, column=0, padx=5, pady=3, sticky='w')
         self.theta_rotation_slider = ttk.Scale(parent, from_=0, to=360, orient=tk.HORIZONTAL, 
                                              command=self.update_rotation)
         self.theta_rotation_slider.set(0)
-        self.theta_rotation_slider.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
+        self.theta_rotation_slider.grid(row=0, column=1, padx=5, pady=3, sticky='ew')
         
-        # Animation controls
-        ttk.Button(parent, text="Play", command=self.start_rotation_animation).grid(row=0, column=2, padx=5, pady=5)
-        ttk.Button(parent, text="Pause", command=self.stop_rotation_animation).grid(row=0, column=3, padx=5, pady=5)
-        ttk.Button(parent, text="Reset", command=self.reset_rotation).grid(row=0, column=4, padx=5, pady=5)
+        # Animation controls in a separate row
+        button_frame = ttk.Frame(parent)
+        button_frame.grid(row=1, column=0, columnspan=2, pady=5)
+        
+        ttk.Button(button_frame, text="Play", command=self.start_rotation_animation).pack(side=tk.LEFT, padx=1)
+        ttk.Button(button_frame, text="Pause", command=self.stop_rotation_animation).pack(side=tk.LEFT, padx=1)
+        ttk.Button(button_frame, text="Reset", command=self.reset_rotation).pack(side=tk.LEFT, padx=1)
         
         # Configure grid weights
         parent.columnconfigure(1, weight=1)
+        parent.rowconfigure(0, weight=1)
+        parent.rowconfigure(1, weight=1)
         
     def create_3d_position_tab(self):
         """Create the 3D position demo tab"""
@@ -204,21 +235,29 @@ class OdometryGUIDemo:
         desc_text = """This demo shows 3D position representation with orthogonal basis vectors.
         Use the sliders to control the 3D position and see coordinate transformations."""
         desc_label = ttk.Label(pos3d_frame, text=desc_text, wraplength=600, 
-                              font=('Arial', 10))
+                              font=('Arial', 10), justify=tk.CENTER)
         desc_label.pack(pady=5)
         
+        # Create paned window for resizable sections
+        paned_window = ttk.PanedWindow(pos3d_frame, orient=tk.VERTICAL)
+        paned_window.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Create plot frame (top section)
+        plot_frame = ttk.Frame(paned_window)
+        paned_window.add(plot_frame, weight=3)  # Plot gets more space
+        
         # Create matplotlib figure
-        self.pos3d_fig = Figure(figsize=(10, 8), dpi=100)
-        self.pos3d_canvas = FigureCanvasTkAgg(self.pos3d_fig, pos3d_frame)
-        self.pos3d_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.pos3d_fig = Figure(figsize=(8, 6), dpi=100)  # Reduced figure size
+        self.pos3d_canvas = FigureCanvasTkAgg(self.pos3d_fig, plot_frame)
+        self.pos3d_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Create toolbar
-        pos3d_toolbar = NavigationToolbar2Tk(self.pos3d_canvas, pos3d_frame)
+        pos3d_toolbar = NavigationToolbar2Tk(self.pos3d_canvas, plot_frame)
         pos3d_toolbar.update()
         
-        # Create controls frame
-        controls_frame = ttk.Frame(pos3d_frame)
-        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        # Create controls frame (bottom section)
+        controls_frame = ttk.Frame(paned_window)
+        paned_window.add(controls_frame, weight=1)  # Controls get less space but are always visible
         
         # Initialize 3D position demo
         self.pos3d_demo = Position3DDemo(self.pos3d_fig)
@@ -265,23 +304,32 @@ class OdometryGUIDemo:
         
         # Create description
         desc_text = """This demo shows wheel odometry with sensor noise, landmark-based corrections using EKF,
-        and error analysis. Compare simple odometry vs. EKF performance."""
+        and error analysis. Compare simple odometry vs. EKF performance.
+        The EKF is used to correct the odometry estimate using landmark measurements."""
         desc_label = ttk.Label(odometry_frame, text=desc_text, wraplength=600, 
-                              font=('Arial', 10))
+                              font=('Arial', 10), justify=tk.CENTER)
         desc_label.pack(pady=5)
         
+        # Create paned window for resizable sections
+        paned_window = ttk.PanedWindow(odometry_frame, orient=tk.VERTICAL)
+        paned_window.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Create plot frame (top section)
+        plot_frame = ttk.Frame(paned_window)
+        paned_window.add(plot_frame, weight=3)  # Plot gets more space
+        
         # Create matplotlib figure
-        self.odometry_fig = Figure(figsize=(14, 10), dpi=100)
-        self.odometry_canvas = FigureCanvasTkAgg(self.odometry_fig, odometry_frame)
-        self.odometry_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.odometry_fig = Figure(figsize=(10, 7), dpi=100)  # Reduced figure size
+        self.odometry_canvas = FigureCanvasTkAgg(self.odometry_fig, plot_frame)
+        self.odometry_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Create toolbar
-        odometry_toolbar = NavigationToolbar2Tk(self.odometry_canvas, odometry_frame)
+        odometry_toolbar = NavigationToolbar2Tk(self.odometry_canvas, plot_frame)
         odometry_toolbar.update()
         
-        # Create controls frame
-        controls_frame = ttk.Frame(odometry_frame)
-        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        # Create controls frame (bottom section)
+        controls_frame = ttk.Frame(paned_window)
+        paned_window.add(controls_frame, weight=1)  # Controls get less space but are always visible
         
         # Initialize wheel odometry demo
         self.odometry_demo = WheelOdometryDemo(self.odometry_fig)
@@ -293,16 +341,19 @@ class OdometryGUIDemo:
         
     def create_odometry_controls(self, parent):
         """Create controls for wheel odometry demo"""
-        # Control buttons
-        ttk.Button(parent, text="Play", command=self.start_odometry_simulation).grid(row=0, column=0, padx=5, pady=5)
-        ttk.Button(parent, text="Pause", command=self.stop_odometry_simulation).grid(row=0, column=1, padx=5, pady=5)
-        ttk.Button(parent, text="Reset", command=self.reset_odometry_simulation).grid(row=0, column=2, padx=5, pady=5)
-        ttk.Button(parent, text="Step", command=self.step_odometry_simulation).grid(row=0, column=3, padx=5, pady=5)
+        # Control buttons in a frame for better spacing control
+        button_frame = ttk.Frame(parent)
+        button_frame.grid(row=0, column=0, columnspan=5, pady=5)
+        
+        ttk.Button(button_frame, text="Play", command=self.start_odometry_simulation).pack(side=tk.LEFT, padx=1)
+        ttk.Button(button_frame, text="Pause", command=self.stop_odometry_simulation).pack(side=tk.LEFT, padx=1)
+        ttk.Button(button_frame, text="Reset", command=self.reset_odometry_simulation).pack(side=tk.LEFT, padx=1)
+        ttk.Button(button_frame, text="Step", command=self.step_odometry_simulation).pack(side=tk.LEFT, padx=1)
         
         # Landmarks toggle
         self.landmarks_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(parent, text="Use Landmarks", variable=self.landmarks_var, 
-                       command=self.toggle_landmarks).grid(row=0, column=4, padx=5, pady=5)
+        ttk.Checkbutton(button_frame, text="Use Landmarks", variable=self.landmarks_var, 
+                       command=self.toggle_landmarks).pack(side=tk.LEFT, padx=1)
         
         # Parameter sliders
         ttk.Label(parent, text="Total Time (s):").grid(row=1, column=0, padx=5, pady=5)

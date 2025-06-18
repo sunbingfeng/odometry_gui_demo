@@ -11,7 +11,6 @@ A comprehensive GUI application demonstrating various robotics and odometry conc
 - **Pose Information**: Displays formatted pose information
 
 ### 2. Rotation Demo
-- **2D Point Rotation**: Demonstrates rotation of points in 2D space
 - **2D Vector Rotation**: Shows rotation of vectors with visual arrows
 - **3D Vector Rotation**: 3D vector rotation around Z-axis
 - **Matrix Display**: Real-time rotation matrix visualization
@@ -20,8 +19,6 @@ A comprehensive GUI application demonstrating various robotics and odometry conc
 
 ### 3. 3D Position Demo
 - **3D Position Visualization**: Interactive 3D position representation
-- **Orthogonal Basis**: Shows coordinate systems at different positions
-- **Position Components**: Bar chart showing x, y, z components
 - **Vector Properties**: Displays magnitude, unit vector, and angles
 - **Coordinate Systems**: Shows Cartesian, spherical, and cylindrical coordinates
 - **Real-time Updates**: Sliders for 3D position control
